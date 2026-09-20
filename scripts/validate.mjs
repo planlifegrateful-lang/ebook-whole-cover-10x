@@ -20,24 +20,22 @@ const required = [
 let failed = 0;
 
 function ok(msg) {
-  console.log(`  \u2713 ${msg}`);
+  console.log("  OK  " + msg);
 }
 function fail(msg) {
-  console.error(`  \u2717 ${msg}`);
+  console.error("  FAIL  " + msg);
   failed += 1;
 }
 
-console.log("\n\u25b8 ebook-whole-cover-10x CI validate\n");
+console.log("\n> ebook-whole-cover-10x CI validate\n");
 
-// 1. Required files
 console.log("Required files");
 for (const rel of required) {
   const p = resolve(root, rel);
   if (existsSync(p)) ok(rel);
-  else fail(`missing: ${rel}`);
+  else fail("missing: " + rel);
 }
 
-// 2. BookCoverView surface
 console.log("\nBookCoverView surface");
 const coverPath = resolve(root, "src/components/BookCoverView.jsx");
 if (existsSync(coverPath)) {
@@ -49,17 +47,16 @@ if (existsSync(coverPath)) {
     ["export PNG", /exportSpread|html2canvas/],
     ["ISBN barcode", /isbn/i],
     ["print support", /printSpread|@media print/],
-    ["size variants", /sizeMap|size\s*=\s*["']md["']/],
+    ["size variants", /sizeMap/],
   ];
   for (const [label, re] of checks) {
     if (re.test(src)) ok(label);
-    else fail(`BookCoverView missing: ${label}`);
+    else fail("BookCoverView missing: " + label);
   }
   if (src.length < 2000) fail("BookCoverView suspiciously small");
-  else ok(`size ${src.length} bytes`);
+  else ok("size " + src.length + " bytes");
 }
 
-// 3. BookCard surface
 console.log("\nBookCardWithWholeCover surface");
 const cardPath = resolve(root, "src/components/BookCardWithWholeCover.jsx");
 if (existsSync(cardPath)) {
@@ -72,7 +69,6 @@ if (existsSync(cardPath)) {
   else fail("missing default export");
 }
 
-// 4. Integration patch has auto-open
 console.log("\nIntegration patch");
 const patchPath = resolve(root, "patches/BookReader-integration.md");
 if (existsSync(patchPath)) {
@@ -85,10 +81,9 @@ if (existsSync(patchPath)) {
   else fail("missing hero integration block");
 }
 
-// Summary
 console.log("");
 if (failed > 0) {
-  console.error(`FAILED: ${failed} check(s)\n`);
+  console.error("FAILED: " + failed + " check(s)\n");
   process.exit(1);
 }
 console.log("ALL CHECKS PASSED\n");

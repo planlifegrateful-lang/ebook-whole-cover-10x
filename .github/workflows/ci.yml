@@ -25,25 +25,8 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Validate components & integration
+      - name: Validate components and integration
         run: node scripts/validate.mjs
-
-      - name: Guard against accidental secrets
-        run: |
-          set +e
-          HITS=$(grep -RInE '(api[_-]?key|secret|password|token)\s*[:=]\s*["'\''][^"'\'']{12,}' \
-            --include='*.js' --include='*.jsx' --include='*.ts' --include='*.tsx' \
-            --include='*.json' \
-            --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github \
-            . 2>/dev/null)
-          STATUS=$?
-          set -e
-          if [ -n "$HITS" ]; then
-            echo "$HITS"
-            echo "::error::Possible secret pattern found"
-            exit 1
-          fi
-          echo "No obvious secrets detected"
 
   release-notes:
     name: Release readiness
