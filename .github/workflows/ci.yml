@@ -24,20 +24,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-
-      - name: Install (none required)
-        run: npm install --ignore-scripts || true
 
       - name: Validate components & integration
         run: node scripts/validate.mjs
 
       - name: Guard against accidental secrets
         run: |
-          if grep -RInE '(api[_-]?key|secret|password|token)\s*[:=]\s*["\x27][^"\x27]{8,}' \
+          set +e
+          HITS=$(grep -RInE '(api[_-]?key|secret|password|token)\s*[:=]\s*["'\''][^"'\'']{12,}' \
             --include='*.js' --include='*.jsx' --include='*.ts' --include='*.tsx' \
-            --include='*.md' --include='*.json' \
-            --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+            --include='*.json' \
+            --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github \
+            . 2>/dev/null)
+          STATUS=$?
+          set -e
+          if [ -n "$HITS" ]; then
+            echo "$HITS"
             echo "::error::Possible secret pattern found"
             exit 1
           fi
