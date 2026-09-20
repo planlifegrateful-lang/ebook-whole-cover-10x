@@ -1,0 +1,16 @@
+{
+  "name": "ebook-whole-cover-10x",
+  "version": "1.0.0",
+  "private": true,
+  "description": "10/10 whole-book cover system: 3D tilt, flip, PNG export, card hover, auto-open, ISBN barcode",
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate.mjs",
+    "ci": "npm run validate"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": ["ebook", "cover", "react", "3d", "export"],
+  "license": "MIT"
+}
