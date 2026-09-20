@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 /**
  * Zero-dep CI validator for ebook-whole-cover-10x
- * Checks required files, basic syntax, and export surface.
  */
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
@@ -31,8 +30,7 @@ console.log("\n> ebook-whole-cover-10x CI validate\n");
 
 console.log("Required files");
 for (const rel of required) {
-  const p = resolve(root, rel);
-  if (existsSync(p)) ok(rel);
+  if (existsSync(resolve(root, rel))) ok(rel);
   else fail("missing: " + rel);
 }
 
@@ -41,16 +39,16 @@ const coverPath = resolve(root, "src/components/BookCoverView.jsx");
 if (existsSync(coverPath)) {
   const src = readFileSync(coverPath, "utf8");
   const checks = [
-    ["default export", /export\s+default\s+function\s+BookCoverView/],
-    ["3D tilt state", /tilting/],
-    ["flip state", /flipped/],
-    ["export PNG", /exportSpread|html2canvas/],
-    ["ISBN barcode", /isbn/i],
-    ["print support", /printSpread|@media print/],
-    ["size variants", /sizeMap/],
+    ["default export", "export default function BookCoverView"],
+    ["3D tilt state", "tilting"],
+    ["flip state", "flipped"],
+    ["export PNG", "exportSpread"],
+    ["ISBN barcode", "isbn"],
+    ["print support", "printSpread"],
+    ["size variants", "sizeMap"],
   ];
-  for (const [label, re] of checks) {
-    if (re.test(src)) ok(label);
+  for (const [label, needle] of checks) {
+    if (src.includes(needle) || src.toLowerCase().includes(needle.toLowerCase())) ok(label);
     else fail("BookCoverView missing: " + label);
   }
   if (src.length < 2000) fail("BookCoverView suspiciously small");
@@ -61,11 +59,11 @@ console.log("\nBookCardWithWholeCover surface");
 const cardPath = resolve(root, "src/components/BookCardWithWholeCover.jsx");
 if (existsSync(cardPath)) {
   const src = readFileSync(cardPath, "utf8");
-  if (/BookCoverView/.test(src)) ok("imports BookCoverView");
+  if (src.includes("BookCoverView")) ok("imports BookCoverView");
   else fail("does not import BookCoverView");
-  if (/onMouseEnter|showSpread/.test(src)) ok("hover preview");
+  if (src.includes("onMouseEnter") || src.includes("showSpread")) ok("hover preview");
   else fail("missing hover preview");
-  if (/export\s+default/.test(src)) ok("default export");
+  if (src.includes("export default")) ok("default export");
   else fail("missing default export");
 }
 
@@ -73,11 +71,11 @@ console.log("\nIntegration patch");
 const patchPath = resolve(root, "patches/BookReader-integration.md");
 if (existsSync(patchPath)) {
   const src = readFileSync(patchPath, "utf8");
-  if (/localStorage|wholeCoverSeen/.test(src)) ok("auto-open localStorage");
+  if (src.includes("localStorage") || src.includes("wholeCoverSeen")) ok("auto-open localStorage");
   else fail("missing auto-open instructions");
-  if (/showWholeCover/.test(src)) ok("toggle state");
+  if (src.includes("showWholeCover")) ok("toggle state");
   else fail("missing toggle state");
-  if (/AnimatePresence|BookCoverView/.test(src)) ok("hero integration");
+  if (src.includes("AnimatePresence") || src.includes("BookCoverView")) ok("hero integration");
   else fail("missing hero integration block");
 }
 
