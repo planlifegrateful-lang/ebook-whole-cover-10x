@@ -2,20 +2,43 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
   workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
     name: Validate package
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate components and integration
+        run: node scripts/validate.mjs
+
+  release-notes:
+    name: Release readiness
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
-      - name: List files
+      - name: Confirm drop-in files present
         run: |
-          ls -la
-          ls -la scripts/ || true
-          ls -la src/components/ || true
-          node --version
-      - name: Run validate
-        run: node scripts/validate.mjs
+          test -f src/components/BookCoverView.jsx
+          test -f src/components/BookCardWithWholeCover.jsx
+          test -f patches/BookReader-integration.md
+          test -f INSTALL.md
+          echo "Release artifacts OK"

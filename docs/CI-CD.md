@@ -1,34 +1,45 @@
 # CI/CD for Ebook Whole-Cover + Your Stack
 
+## Status (2026-09-20)
+
+| Layer | Status |
+|-------|--------|
+| Package + components | Live on GitHub |
+| Local validate (`npm run validate`) | Passes |
+| GitHub Actions workflow file | Present at `.github/workflows/ci.yml` |
+| GitHub Actions **runs** | **Blocked** — account locked due to billing issue |
+| Vercel CD for full apps | Available (team already has 3 projects) |
+
+**Fix Actions:** GitHub → Settings → Billing → resolve payment / unlock account. After unlock, re-run the workflow from the Actions tab (or push any commit).
+
+---
+
 ## This package (ebook-whole-cover-10x)
 
 | Trigger | What runs |
 |---------|-----------|
-| Push / PR to `main` | Validate required files, component surface, integration patch, secret scan |
+| Push / PR to `main` | Validate required files + component surface + integration patch |
 | Manual `workflow_dispatch` | Same validation |
 
 **Workflow:** `.github/workflows/ci.yml`  
-**Local:** `npm run validate` or `node scripts/validate.mjs`
+**Local (works now):** `npm run validate` or `node scripts/validate.mjs`
 
-This is a **drop-in component package**, not a full app. CI proves the files are complete and safe to copy into Base44 / your React app. No build/deploy to Vercel is required for the package itself.
+This is a **drop-in component package**. CI proves files are complete. No Vercel deploy needed for the package itself.
 
 ---
 
 ## Full-app CI/CD (your other projects)
 
-### Pattern A — Vercel (recommended for Next/React apps)
+### Pattern A — Vercel (recommended for Next/React)
 
-1. Push code to GitHub.
-2. In Vercel: **Add New Project** → import the repo → set framework preset.
-3. Every push to `main` = production deploy; every PR = preview URL.
-4. Env vars: Project Settings → Environment Variables (never commit secrets).
-
-**Already on your Vercel team (`team_L2XAeBhptlBuRHZH2AiDlHN5`):**
+Your Vercel team (`team_L2XAeBhptlBuRHZH2AiDlHN5`) already has:
 - `instantoffer`
 - `otto-server-wow`
 - `ugc-ad-script-engine`
 
-### Pattern B — GitHub Actions → Vercel CLI (when you need custom steps)
+**Flow:** push to GitHub → Vercel auto-deploys production on `main`, preview on PRs. Env vars stay in Vercel dashboard (never in git).
+
+### Pattern B — GitHub Actions → Vercel CLI
 
 ```yaml
 # .github/workflows/deploy.yml
@@ -52,37 +63,30 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 ```
 
-Secrets to add in GitHub → Settings → Secrets:
-- `VERCEL_TOKEN` (from Vercel account tokens)
-- `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` (from project settings)
+Requires GitHub billing unlocked + secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
 
-### Pattern C — Docker (you already use this)
+### Pattern C — Docker (already in your account)
 
-Seen in `Planlife-agent0-openmanus`:
-- `docker-publish.yml` — build on version tags `v*.*.*`
-- Keep that for services that need containers; use Vercel for frontend.
+`Planlife-agent0-openmanus` uses:
+- `docker-publish.yml` on tags `v*.*.*`
+- Keep for agents/services; use Vercel for frontends.
 
 ---
 
-## Recommended pipeline per product type
+## Recommended by product type
 
 | Product type | CI | CD |
 |--------------|----|----|
-| Component pack (this repo) | GitHub Actions validate | Copy into app (or npm publish later) |
-| Next/React SaaS | GitHub Actions lint/test | Vercel auto on push |
-| Python agent / video pipeline | GitHub Actions + Docker | Tag → Docker image / server pull |
-| Digital product (Gumroad/Whop) | Validate assets | Manual or scripted upload |
+| Component pack (this repo) | `npm run validate` + Actions (after billing) | Copy into app |
+| Next/React SaaS | Lint/test | **Vercel** auto on push |
+| Python agent / video | Actions + Docker | Tag → image |
+| Digital product (Gumroad/Whop) | Asset checks | Manual / script upload |
 
 ---
 
-## Next upgrades (optional)
+## Immediate actions for you
 
-1. **npm publish** workflow on `v*` tags for this package.
-2. **Vercel project** linked to a demo app that imports `BookCoverView`.
-3. **Status badge** in README (already present).
-
-Badge:
-
-```markdown
-![CI](https://github.com/planlifegrateful-lang/ebook-whole-cover-10x/actions/workflows/ci.yml/badge.svg)
-```
+1. **Unlock GitHub billing** so Actions can run.  
+2. Until then, run **local CI**: `node scripts/validate.mjs` (already green).  
+3. For app deploys, prefer **Vercel** (no Actions dependency).  
+4. After billing is fixed: Actions tab → CI → Re-run jobs.
