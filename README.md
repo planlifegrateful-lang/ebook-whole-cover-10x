@@ -1,6 +1,8 @@
 # Ebook Whole-Cover Upgrade – 10/10 Complete Package
 
 ![CI](https://github.com/planlifegrateful-lang/ebook-whole-cover-10x/actions/workflows/ci.yml/badge.svg)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue)](CHANGELOG.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **All requested features shipped and live on GitHub.**
 
@@ -10,9 +12,13 @@
 4. **Auto-open first time** – opens the whole-book view the first time a user lands on a finished book  
 5. **Polished back cover** – refined typography, series branding, visual ISBN-13 barcode  
 
-## Repo
+## Install (60 seconds)
 
-https://github.com/planlifegrateful-lang/ebook-whole-cover-10x
+See **[INSTALL.md](INSTALL.md)**.
+
+```bash
+npm run validate   # or: node scripts/validate.mjs
+```
 
 ## Files
 
@@ -21,23 +27,24 @@ src/components/BookCoverView.jsx          ← main 3D spread + export
 src/components/BookCardWithWholeCover.jsx ← home-page card with hover preview
 patches/BookReader-integration.md         ← exact paste instructions
 INSTALL.md                                ← 60-second checklist
+TROUBLESHOOTING.md                        ← common failures + fixes
+docs/BOOK-DATA-SHAPE.md                   ← required book object contract
 docs/CI-CD.md                             ← full CI/CD playbook
+examples/sample-book.json                 ← example data
 .github/workflows/ci.yml                  ← automated validation
 scripts/validate.mjs                      ← local + CI checks
 package.json
+LICENSE
+CHANGELOG.md
 ```
 
-## Install (60 seconds)
+## Book data shape
 
-See `INSTALL.md`.
+See **[docs/BOOK-DATA-SHAPE.md](docs/BOOK-DATA-SHAPE.md)**.
 
 ## CI
 
-```bash
-npm run validate   # or: node scripts/validate.mjs
-```
-
-Pushes and PRs to `main` run the same checks automatically.
+Pushes and PRs to `main` run `node scripts/validate.mjs` automatically.
 
 ## Zero-config notes
 
@@ -46,14 +53,16 @@ Pushes and PRs to `main` run the same checks automatically.
 - Keyboard flip (Enter/Space) + ARIA labels
 - Print CSS isolates the spread
 
-## CI/CD
+## Known limitations
 
-See **[docs/CI-CD.md](docs/CI-CD.md)** for:
-- This package’s GitHub Actions pipeline  
-- Vercel deploy pattern for full apps  
-- Docker patterns you already use  
-- Recommended pipeline by product type  
+- Drop-in for React + utility CSS apps. Swap `@/components/ui/*` and lucide-react for your stack if needed.
+- ISBN is visual/deterministic only (not a real registered number).
+- html2canvas optional for PNG export.
 
-## Go beyond
+## License
 
-Want a **3D open-book page-turn** for chapters, a **live back-cover editor**, or **npm publish on tags**? Open an issue or say the word.
+MIT – see LICENSE.
+
+---
+
+Want a full page-turn chapter reader, live back-cover editor, or npm publish on tags? Open an issue.
